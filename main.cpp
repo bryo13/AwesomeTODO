@@ -8,6 +8,10 @@
 #include <string>
 #include <optional>
 
+
+void explainError(std::string msg);
+constexpr std::optional<std::string> message(int argc, char* argv[]);
+
 // 1. get home path
 constexpr std::optional<std::string> returnHome() {
 	const char* home = std::getenv("HOME");
@@ -45,9 +49,9 @@ constexpr std::optional<std::string> currentTask(std::string todoPath) {
 constexpr bool addTask(std::string todoPath, std::string task) {
 	std::ofstream todoFile {todoPath, std::ios::app};
 	if (!todoFile) {
-		std::cerr<<todoPath<<" does not seem to exist\n";
 		todoFile.close();
-		return false;
+		std::string error {todoPath + " does not seem to exist"};
+		explainError(error);
 	} else {
 		todoFile << task << "\n";
 		todoFile.close();
@@ -58,7 +62,49 @@ constexpr bool addTask(std::string todoPath, std::string task) {
 // 4. remove todo elements
 // Removing todo saves them, motivation to get more stuff done!
 
-// 5a helper func to combine string after argv[1]
+
+// 5. handle args
+void handleArgs(int argc, char* argv[]) {
+	auto home {returnHome()};
+	std::string todo {"/todo/todo.txt"};
+	std::string todoPath {*home + todo}; // deconstruct home in if statement 
+
+	std::string firstArg {argv[1]};
+	auto joinedArgs {message(argc, argv)};
+
+	if ("add" == firstArg) {
+		if (addTask(todoPath, *joinedArgs)) {
+			std::cout<<"Successfully added "<<*joinedArgs<<"\n";
+		} else {
+			explainError("adding todo item");
+		}
+	} else {
+		explainError("unknown arg");
+	}
+}
+// 6. add "alarm" when task are not done before 10pm
+// 7. Reminder to set next days TODO
+
+int main(int argc, char* argv[]) {
+	if (argc < 2) {
+		explainError("few args");
+	}
+	
+	handleArgs(argc, argv);
+	return 0;
+}
+// helper functions 
+
+void explainError(std::string msg) {
+	std::string error {msg};
+	std::cerr<<"Error caused by: "<<error<<"\n";
+	std::cerr<<" program usage: \n"; 
+	std::cerr<<" ./todo add finish this project\n"; 
+	std::cerr<<" ./todo done //removes the active task"; 
+	return;
+}
+
+// helper func to combine string after argv[1]
 constexpr std::optional<std::string> message(int argc, char* argv[]) {
 	if (argc < 3) {
 		std::cerr<<"Add arguments \n";
@@ -74,29 +120,7 @@ constexpr std::optional<std::string> message(int argc, char* argv[]) {
 	return joinedArgs;
 }
 
-// 5. handle args
-void handleArgs(int argc, char* argv[]) {
-	auto home {returnHome()};
-	std::string todo {"/todo.txt"};
-	std::string todoPath {*home + todo};
-
-	std::string firstArg {argv[1]};
-	auto joinedArgs {message(argc, argv)};
-
-	if ("add" == firstArg) {
-		if (addTask(todoPath, *joinedArgs)) {
-			std::cout<<"Successfully added "<<*joinedArgs<<"\n";
-		} else {
-			std::cerr<<"Error adding new todo! \n";
-			return;
-		}
-	} else {
-		std::cerr<<"Unknown arg \n";
-	}
-}
-
-// 6. add "alarm" when task are not done before 10pm
-int main(int argc, char* argv[]) {
-	handleArgs(argc, argv);
-	return 0;
+// get icons path
+constexpr std::optional<std::string> iconPath(std::string home) {
+	
 }
