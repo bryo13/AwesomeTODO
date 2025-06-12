@@ -11,7 +11,6 @@
 
 void explainError(std::string msg);
 constexpr std::optional<std::string> message(int argc, char* argv[]);
-constexpr std::optional<std::string> iconPath(std::string home);
 
 // 1. get home path
 constexpr std::optional<std::string> returnHome() {
@@ -53,11 +52,6 @@ constexpr bool addTask(std::string todoPath, std::string task) {
 		explainError("Home env not defined");
 		return false;
 	}
-	auto iconPth {iconPath(*home)};
-	if (!iconPth)  {
-		explainError("icon path not defined");
-		return false;
-	}
 	std::ofstream todoFile {todoPath, std::ios::app};
 	if (!todoFile) {
 		todoFile.close();
@@ -65,7 +59,7 @@ constexpr bool addTask(std::string todoPath, std::string task) {
 		explainError(error);
 		return false;
 	} else {
-		todoFile <<*iconPth<<"- " << task << "\n";
+		todoFile  << task << "\n";
 		todoFile.close();
 		return true;
 	}
@@ -146,9 +140,3 @@ constexpr std::optional<std::string> message(int argc, char* argv[]) {
 	}
 }
 
-// get icons path
-constexpr std::optional<std::string> iconPath(std::string home) {
-	std::string ic {"/todo/icons/thunder.png"};
-	std::string icons {home + ic};
-	return icons;
-}
