@@ -17,15 +17,31 @@ local todo_widget = wibox.widget.textbox()
 local function update_todo_list()
     local f = io.open(todo_file, "r")
     local todo_content = ""
+    local has_items = false;
+
     if f then
+        local lines = {};
         for line in f:lines() do
-            todo_content = todo_content .. line .. "\n"
+            --todo_content = todo_content .. line .. "\n"
+            table.insert(lines, line)
         end
         f:close()
+        if #lines > 0 then
+            has_items = true
+            todo_content = table.concat(lines, "\n")
+        else
+            todo_content = "No pending task"
+        end
     else
         todo_content = "No todo file found!"
     end
-    todo_widget.text = todo_content
+
+    local current_time = os.date("*t")
+    if has_items and (current_time.hour > CRITICAL_HR or (current_time.hour == CRITICAL_HR and current_time.min >= CRITICAL_MIN)) then 
+        todo_widget.markup = '<span foreground="red">' .. todo_content .. '</span>'
+    else
+        todo_widget.text = todo_content
+    end
 end
 
 

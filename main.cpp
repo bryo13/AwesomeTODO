@@ -12,6 +12,7 @@
 
 void explainError(std::string msg);
 constexpr std::optional<std::string> message(int argc, char* argv[]);
+constexpr std::string capitalize(std::string& argsChain);
 
 // Get home path
 constexpr std::optional<std::string> returnHome() {
@@ -98,7 +99,8 @@ void handleArgs(int argc, char* argv[]) {
 		explainError("error handling args");
 		return;
 	}
-	
+	std::string chainedArgs {capitalize(*joinedArgs)};
+
 	std::string todo {"/todo/todo.txt"};
 	std::string done {"/todo/done.txt"};
 	std::string todoPath = *home + todo;
@@ -107,7 +109,7 @@ void handleArgs(int argc, char* argv[]) {
 	std::string firstArg {argv[1]};
 
 	if ("add" == firstArg) {
-		if (addTask(todoPath, *joinedArgs)) {
+		if (addTask(todoPath, chainedArgs)) {
 			std::cout<<"Successfully added "<<*joinedArgs<<"\n";
 		} else {
 			explainError("adding todo item");
@@ -118,6 +120,9 @@ void handleArgs(int argc, char* argv[]) {
 		} else {
 			explainError("removing active task");
 		}
+	} else {
+		explainError("not a valid argument");
+		return;
 	}	
 }
 //  add "alarm" when task are not done before 10pm
@@ -162,3 +167,10 @@ constexpr std::optional<std::string> message(int argc, char* argv[]) {
 	}
 }
 
+// Optional, capitalize first letter of args
+constexpr std::string capitalize(std::string& argsChain) {
+	if (std::islower(argsChain[0])) {
+		argsChain[0] = std::toupper(argsChain[0]);
+	}
+	return argsChain;
+}
