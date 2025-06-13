@@ -26,7 +26,7 @@ constexpr std::optional<std::string> returnHome() {
 
 // 2. read first line of todo.txt
 // todo.txt is the file read by awesome WM
-constexpr std::optional<std::string> currentTask(std::string todoPath) {
+constexpr std::optional<std::string> currentTask(std::string& todoPath) {
 	std::ifstream todoFile {todoPath};
 	if (!todoFile) {
 		std::cerr<<todoPath<<" does not seem to exist\n";
@@ -46,7 +46,7 @@ constexpr std::optional<std::string> currentTask(std::string todoPath) {
 }
 
 // 3. add todo elements
-constexpr bool addTask(std::string todoPath, std::string task) {
+constexpr bool addTask(std::string& todoPath, std::string& task) {
 	auto home {returnHome()};
 	if (!home) {
 		explainError("Home env not defined");
