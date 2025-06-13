@@ -7,7 +7,8 @@ Simple TODO that will:
 Will use it in Awesome window manager to display the tasks, one at a time.
 
 -----------------
-Awesome WM shows the items in the winbar but anywhere works
+Awesome WM shows the items in the winbar, but anywhere works!
+Awesome's WM rc.lua would look smth like:
 <pre>
 -- Create the textbox widget
 local todo_widget = wibox.widget.textbox()
