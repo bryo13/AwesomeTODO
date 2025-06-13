@@ -57,7 +57,6 @@ constexpr bool removeTask(std::string& todoPath, std::string& donePath) {
 		while(std::getline(todoFile, activeTodo)) {
 			if (first) {
 				first = false;
-				continue;
 				std::ofstream doneFile{donePath,std::ios::trunc};
 				if (!doneFile) {
 					doneFile.close();
@@ -67,6 +66,7 @@ constexpr bool removeTask(std::string& todoPath, std::string& donePath) {
 				} else {
 					doneFile << activeTodo<<"\n";
 				}
+				continue;
 			}
 			todos.push_back(activeTodo);
 		}
