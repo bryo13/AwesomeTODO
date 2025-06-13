@@ -7,12 +7,13 @@
 #include <fstream>
 #include <string>
 #include <optional>
+#include <vector>
 
 
 void explainError(std::string msg);
 constexpr std::optional<std::string> message(int argc, char* argv[]);
 
-// 1. get home path
+// Get home path
 constexpr std::optional<std::string> returnHome() {
 	const char* home = std::getenv("HOME");
 	if (home != nullptr) {
@@ -24,34 +25,8 @@ constexpr std::optional<std::string> returnHome() {
 	}
 }
 
-// 2. read first line of todo.txt
-// todo.txt is the file read by awesome WM
-constexpr std::optional<std::string> currentTask(std::string& todoPath) {
-	std::ifstream todoFile {todoPath};
-	if (!todoFile) {
-		std::cerr<<todoPath<<" does not seem to exist\n";
-		todoFile.close();
-		return std::nullopt;
-	}
-
-	std::string activeTodo;
-	if (std::getline(todoFile, activeTodo)) {
-		todoFile.close();
-		return activeTodo;
-	} else {
-		todoFile.close();
-		std::cerr<<todoPath<<" file is empty or can be read, try adding a task using ./todo add finish todo project\n";
-		return std::nullopt;
-	}
-}
-
-// 3. add todo elements
+// Add todo elements
 constexpr bool addTask(std::string& todoPath, std::string& task) {
-	auto home {returnHome()};
-	if (!home) {
-		explainError("Home env not defined");
-		return false;
-	}
 	std::ofstream todoFile {todoPath, std::ios::app};
 	if (!todoFile) {
 		todoFile.close();
@@ -65,41 +40,88 @@ constexpr bool addTask(std::string& todoPath, std::string& task) {
 	}
 	return false;
 }
-// 4. remove todo elements
+
+// Remove todo elements
 // Removing todo saves them, motivation to get more stuff done!
+constexpr bool removeTask(std::string& todoPath, std::string& donePath) {
+	std::ifstream todoFile {todoPath};
+	std::vector<std::string> todos;
+	std::string activeTodo;
+	if (!todoFile) {
+		todoFile.close();
+		std::string error {todoPath + " does not seem to exist"};
+		explainError(error);
+		return false;
+	} else {
+		bool first = true;
+		while(std::getline(todoFile, activeTodo)) {
+			if (first) {
+				first = false;
+				continue;
+				std::ofstream doneFile{donePath,std::ios::trunc};
+				if (!doneFile) {
+					doneFile.close();
+					std::string error {donePath + " does not seem to exist"};
+					explainError(error);
+					return false;
+				} else {
+					doneFile << activeTodo<<"\n";
+				}
+			}
+			todos.push_back(activeTodo);
+		}
+		todoFile.close();
 
+		// remaining TODO
+		std::ofstream remFile{todoPath,std::ios::trunc};
+		if (!remFile) {
+			remFile.close();
+			std::string error {todoPath + " does not seem to exist"};
+			explainError(error);
+			return false;
+		} else {
+			for (const auto& l : todos) {
+				remFile << l << "\n";
+			}
+			remFile.close();
+			return true;
+		}
+	}
+	return false;
+}
 
-// 5. handle args
+// handle args
 void handleArgs(int argc, char* argv[]) {
 	auto home {returnHome()};
 	auto joinedArgs {message(argc, argv)};
-	if (!joinedArgs) {
-		explainError("error reading todo task");
+	if (!joinedArgs || !home) {
+		explainError("error handling args");
 		return;
 	}
-	if (home) {
-		std::string todo {"/todo/todo.txt"};
-		std::string todoPath = *home + todo;
+	
+	std::string todo {"/todo/todo.txt"};
+	std::string done {"/todo/done.txt"};
+	std::string todoPath = *home + todo;
+	std::string donePath = *home + done;
 
-		std::string firstArg {argv[1]};
+	std::string firstArg {argv[1]};
 
-		if ("add" == firstArg) {
-			if (addTask(todoPath, *joinedArgs)) {
-				std::cout<<"Successfully added "<<*joinedArgs<<"\n";
-			} else {
-				explainError("adding todo item");
-			}
+	if ("add" == firstArg) {
+		if (addTask(todoPath, *joinedArgs)) {
+			std::cout<<"Successfully added "<<*joinedArgs<<"\n";
 		} else {
-			explainError("unknown arg");
-			return;
+			explainError("adding todo item");
+		}	
+	} else if ("done" == firstArg) {
+		if (removeTask(todoPath, donePath)) {
+			std::cout<<"All done, onto to the next one!"<<"\n";
+		} else {
+			explainError("removing active task");
 		}
-	}	else {
-		explainError("Home env not defined");
-		return;
 	}	
 }
-// 6. add "alarm" when task are not done before 10pm
-// 7. Reminder to set next days TODO
+//  add "alarm" when task are not done before 10pm
+//  Reminder to set next days TODO
 
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
@@ -111,7 +133,7 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-// 8. helper functions 
+// helper functions 
 
 void explainError(std::string msg) {
 	std::string error{msg};
