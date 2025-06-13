@@ -42,3 +42,9 @@ gears.timer {
 
   -- call the widget in s.mywibox:setup block
 </pre>
+
+------------------------------------------------
+Currently, have this:
+![TODO items](./img/todoitem.png)
+![Whole winbar](./img/winbar.png)
+![Whole screen](./img/full_page.png)
