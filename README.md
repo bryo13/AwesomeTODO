@@ -44,7 +44,12 @@ gears.timer {
 </pre>
 
 ------------------------------------------------
-Currently, have this:
+Currently, have this:  
+***Active TODO items***  
 ![TODO items](./img/todoitem.png)
+
+***Winbar***  
 ![Whole winbar](./img/winbar.png)
+
+***Whole screen***  
 ![Whole screen](./img/full_page.png)
